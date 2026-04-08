@@ -29,6 +29,20 @@ const sportsData = {
             { name: 'Jamal Musiala', goals: 12, matches: 28 },
             { name: 'Leroy Sané', goals: 10, matches: 28 },
             { name: 'Thomas Müller', goals: 7, matches: 25 }
+        ],
+        upcoming: [
+            { utcDate: '2024-04-10T20:00:00Z', homeTeam: { name: 'Bayern München', crest: 'https://crests.football-data.org/5.png' }, awayTeam: { name: 'Arsenal', crest: 'https://crests.football-data.org/57.png' } },
+            { utcDate: '2024-04-13T13:30:00Z', homeTeam: { name: 'Bayern München', crest: 'https://crests.football-data.org/5.png' }, awayTeam: { name: 'FC Köln', crest: 'https://crests.football-data.org/1.png' } }
+        ],
+        standings: [
+            {
+                table: [
+                    { position: 1, team: { name: 'Bayern München', crest: 'https://crests.football-data.org/5.png' }, playedGames: 28, points: 68, goalDifference: 45 },
+                    { position: 2, team: { name: 'Bayer Leverkusen', crest: 'https://crests.football-data.org/3.png' }, playedGames: 28, points: 65, goalDifference: 38 },
+                    { position: 3, team: { name: 'RB Leipzig', crest: 'https://crests.football-data.org/33.png' }, playedGames: 28, points: 58, goalDifference: 25 },
+                    { position: 4, team: { name: 'Dortmund', crest: 'https://crests.football-data.org/4.png' }, playedGames: 28, points: 55, goalDifference: 20 }
+                ]
+            }
         ]
     },
     basketball: {
@@ -36,7 +50,7 @@ const sportsData = {
             totalMatches: 82,
             wins: 58,
             losses: 24,
-            goals: 6245 // Puntos en basket
+            goals: 6245
         },
         chartData: [
             { season: '2021', value: 5820 },
@@ -56,14 +70,15 @@ const sportsData = {
             { name: 'Luka Dončić', goals: 1720, matches: 68 },
             { name: 'Giannis Antetokounmpo', goals: 1680, matches: 70 },
             { name: 'Joel Embiid', goals: 1650, matches: 65 }
-        ]
+        ],
+        standings: [] // Opcional para otros deportes
     },
     tennis: {
         kpis: {
             totalMatches: 56,
             wins: 42,
             losses: 14,
-            goals: 89 // Juegos/Sets
+            goals: 89
         },
         chartData: [
             { season: '2021', value: 68 },
@@ -83,6 +98,7 @@ const sportsData = {
             { name: 'Carlos Alcaraz', goals: 238, matches: 50 },
             { name: 'Jannik Sinner', goals: 225, matches: 48 },
             { name: 'Daniil Medvedev', goals: 210, matches: 46 }
-        ]
+        ],
+        standings: []
     }
 };

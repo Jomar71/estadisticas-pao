@@ -1,304 +1,237 @@
 /**
- * SportsStats Pro - Main Logic
- * Premium Dashboard Engine with Hybrid Data Loading
+ * SportsStats Pro - ESPN Full Integration Engine
+ * Provides coverage for Colombia, Argentina, Mexico, Europe and more.
  */
 
-// --- CONFIGURATION ---
-const DEFAULT_API_KEY = "fe8d6d88bad748bb8e22dbe81130a0ca";
 const PROXY_URL = 'https://api.allorigins.win/raw?url=';
-const API_BASE = 'https://api.football-data.org/v4';
+const ESPN_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer';
 
 let state = {
-    apiKey: localStorage.getItem('sportsStats_apiKey') || DEFAULT_API_KEY,
-    favTeam: localStorage.getItem('sportsStats_favTeam') || "Bayern München",
-    currentSport: 'football',
-    currentLeague: 'PL',
-    isUsingLiveAPI: false,
-    chart: null
+    currentLeague: 'eng.1', // Default to Premier League (ESPN ID)
+    favTeam: localStorage.getItem('sportsStats_favTeam') || "Real Madrid",
+    searchTimeout: null
 };
 
-// --- DOM ELEMENTS ---
-const elements = {
-    kpiPartidos: document.getElementById('kpiPartidos'),
-    kpiVictorias: document.getElementById('kpiVictorias'),
-    kpiDerrotas: document.getElementById('kpiDerrotas'),
-    kpiGoles: document.getElementById('kpiGoles'),
-    matchHistory: document.getElementById('matchHistory'),
-    scorerList: document.getElementById('scorerList'),
-    sourceLabel: document.getElementById('sourceLabel'),
-    leagueSelector: document.getElementById('leagueSelector'),
-    configPanel: document.getElementById('configPanel'),
-    configToggle: document.getElementById('configToggle'),
-    apiKeyInput: document.getElementById('apiKeyInput'),
-    teamInput: document.getElementById('teamInput'),
-    saveApiKey: document.getElementById('saveApiKey'),
-    globalLoader: document.getElementById('globalLoader'),
-    btnFootball: document.getElementById('btnFootball'),
-    btnBasketball: document.getElementById('btnBasketball'),
-    btnTennis: document.getElementById('btnTennis')
-};
+// Safe access to elements
+const get = (id) => document.getElementById(id);
 
-// --- DATA FETCHING ---
-async function fetchAPI(endpoint) {
-    if (!state.apiKey || state.apiKey === "TU_API_KEY_AQUI") return null;
-
-    const url = `${API_BASE}${endpoint}`;
+// --- ESPN FETCH HELPER ---
+async function fetchESPN(endpoint) {
     try {
-        const response = await fetch(PROXY_URL + encodeURIComponent(url), {
-            headers: { 'X-Auth-Token': state.apiKey }
-        });
+        const response = await fetch(PROXY_URL + encodeURIComponent(`${ESPN_BASE}/${endpoint}`));
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return await response.json();
     } catch (error) {
-        console.warn(`API Error on ${endpoint}:`, error.message);
+        console.warn(`[ESPN API] Error en ${endpoint}:`, error.message);
         return null;
     }
 }
 
-// --- UI UPDATES ---
-function showLoader(show) {
-    elements.globalLoader.classList.toggle('hidden', !show);
+// --- ESPN DATA RECOVERY ---
+
+async function loadESPNData() {
+    console.log("[ESPN] Sincronizando marcadores en vivo...");
+    try {
+        // Marcadores TOP (Globales)
+        const scoreRes = await fetchESPN('all/scoreboard');
+        const topScoreboard = get('topScoreboard');
+        if (scoreRes && scoreRes.events && topScoreboard) {
+            topScoreboard.classList.remove('hidden');
+            topScoreboard.innerHTML = scoreRes.events.slice(0, 15).map(event => {
+                const home = event.competitions[0].competitors[0];
+                const away = event.competitions[0].competitors[1];
+                const status = event.status.type.shortDetail;
+                const isLive = event.status.type.state === 'in';
+                return `
+                    <div class="inline-flex items-center gap-3 px-4 py-1.5 bg-slate-900 border border-slate-800 rounded-full text-[10px] min-w-fit hover:border-slate-600 transition-all cursor-default">
+                        <span class="font-bold border-r border-slate-800 pr-2 ${isLive ? 'text-red-500 animate-pulse' : 'text-slate-500'}">${status}</span>
+                        <div class="flex items-center gap-2">
+                            <img src="${home.team.logo}" class="w-4 h-4 object-contain" onerror="this.src='https://a.espncdn.com/i/espn/espn_logos/soccer.png'">
+                            <span class="font-bold text-white">${home.score}</span>
+                        </div>
+                        <span class="text-slate-700">|</span>
+                        <div class="flex items-center gap-2">
+                            <span class="font-bold text-white">${away.score}</span>
+                            <img src="${away.team.logo}" class="w-4 h-4 object-contain" onerror="this.src='https://a.espncdn.com/i/espn/espn_logos/soccer.png'">
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Noticias Globales
+        const newsData = await fetchESPN('all/news');
+        const newsContainer = get('newsContainer');
+        if (newsData && newsData.articles && newsContainer) {
+            newsContainer.innerHTML = newsData.articles.slice(0, 4).map(article => `
+                <a href="${article.links.web.href}" target="_blank" class="group flex gap-4 p-3 hover:bg-slate-800/30 rounded-2xl transition-all border border-transparent hover:border-slate-800">
+                    <div class="relative min-w-[80px]">
+                        <img src="${article.images && article.images[0] ? article.images[0].url : 'https://a.espncdn.com/i/espn/espn_logos/soccer.png'}" class="w-20 h-20 object-cover rounded-xl shadow-lg group-hover:scale-105 transition-transform">
+                        <div class="absolute inset-0 bg-blue-600/10 rounded-xl"></div>
+                    </div>
+                    <div class="flex flex-col justify-center overflow-hidden">
+                        <p class="text-[9px] font-black text-blue-500 uppercase tracking-widest mb-1">${article.published.split('T')[0]}</p>
+                        <h4 class="text-xs font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-2 leading-tight">${article.headline}</h4>
+                    </div>
+                </a>
+            `).join('');
+        }
+    } catch (e) {
+        console.error("Error cargando ESPN Top Data", e);
+    }
 }
 
-function updateKPIs(data) {
-    const kpis = data.kpis;
-    elements.kpiPartidos.innerText = kpis.totalMatches || 0;
-    elements.kpiVictorias.innerText = kpis.wins || 0;
-    elements.kpiDerrotas.innerText = kpis.losses || 0;
-    elements.kpiGoles.innerText = kpis.goals || 0;
-    
-    // Animate entries? Simple version:
-    [elements.kpiPartidos, elements.kpiVictorias, elements.kpiDerrotas, elements.kpiGoles].forEach(el => {
-        el.classList.remove('animate-fade-in');
-        void el.offsetWidth; // trigger reflow
-        el.classList.add('animate-fade-in');
-    });
-}
+async function loadLeagueData() {
+    showLoader(true);
+    const leagueId = state.currentLeague;
+    console.log(`[League] Cargando datos para: ${leagueId}`);
 
-function updateMatches(matches) {
-    elements.matchHistory.innerHTML = matches.map(m => {
-        const resClass = m.result === 'W' || m.result === 'VICTORIA' ? 'badge-win' : 
-                        (m.result === 'L' || m.result === 'DERROTA' ? 'badge-loss' : 'badge-draw');
-        const resLabel = m.result.length > 1 ? m.result : (m.result === 'W' ? 'W' : (m.result === 'L' ? 'L' : 'D'));
-        
-        return `
-            <tr class="hover:bg-slate-800/40 transition-colors group">
-                <td class="px-6 py-4 text-xs text-slate-400 font-medium">${m.date}</td>
-                <td class="px-6 py-4 text-sm font-semibold text-white group-hover:text-blue-400 transition-colors">${m.opponent}</td>
-                <td class="px-6 py-4 text-center">
-                    <span class="px-3 py-0.5 rounded-full text-[10px] font-bold ${resClass}">${resLabel}</span>
-                </td>
-                <td class="px-6 py-4 text-right font-mono text-sm text-slate-300 font-bold">${m.score}</td>
-            </tr>
-        `;
-    }).join('');
-}
+    try {
+        // 1. Standings
+        const standingsData = await fetchESPN(`${leagueId}/standings`);
+        if (standingsData && standingsData.children) {
+            const table = standingsData.children[0].standings.entries;
+            const tableEl = get('standingsTable');
+            tableEl.innerHTML = table.map(item => {
+                const stats = item.stats;
+                const getStat = (name) => stats.find(s => s.name === name)?.displayValue || '0';
+                return `
+                    <tr onclick="showTeamDetails('${leagueId}', '${item.team.id}')" class="cursor-pointer hover:bg-slate-800/40 transition-colors group">
+                        <td class="px-6 py-4 text-xs font-bold text-slate-500">${item.stats.find(s => s.name === 'rank')?.value || '--'}</td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <img src="${item.team.logos[0].href}" class="w-5 h-5 object-contain" onerror="this.src='https://a.espncdn.com/i/espn/espn_logos/soccer.png'">
+                                <span class="text-xs font-bold text-white group-hover:text-blue-400 truncate max-w-[140px]">${item.team.displayName}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-center text-xs text-slate-400 font-medium">${getStat('gamesPlayed')}</td>
+                        <td class="px-6 py-4 text-center text-sm font-bold text-blue-500">${getStat('points')}</td>
+                        <td class="px-6 py-4 text-center text-xs text-slate-500">${getStat('pointDifferential')}</td>
+                    </tr>
+                `;
+            }).join('');
 
-function updateScorers(scorers) {
-    elements.scorerList.innerHTML = scorers.map((s, i) => `
-        <div class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-800/50 transition-all border border-transparent hover:border-slate-800 group">
-            <div class="flex items-center gap-4">
-                <span class="text-xs font-bold text-slate-600 group-hover:text-blue-500 transition-colors">${i + 1}</span>
-                <div class="space-y-0.5">
-                    <p class="text-xs font-bold text-white group-hover:text-blue-100 transition-colors">${s.name || s.player?.name}</p>
-                    <p class="text-[9px] text-slate-500 uppercase tracking-tighter">${s.matches || s.playedMatches || 0} Partidos</p>
-                </div>
-            </div>
-            <div class="text-right">
-                <p class="text-sm font-black text-blue-500">${s.goals}</p>
-                <p class="text-[8px] text-slate-600 font-bold uppercase">Goles</p>
-            </div>
-        </div>
-    `).join('');
-}
+            // UPDATE KPIs with leader or favorite
+            const fav = table.find(t => t.team.displayName.includes(state.favTeam)) || table[0];
+            get('kpiPartidos').innerText = fav.stats.find(s => s.name === 'gamesPlayed')?.displayValue || '--';
+            get('kpiVictorias').innerText = fav.stats.find(s => s.name === 'wins')?.displayValue || '--';
+            get('kpiDerrotas').innerText = fav.stats.find(s => s.name === 'losses')?.displayValue || '--';
+            get('kpiGoles').innerText = fav.stats.find(s => s.name === 'points')?.displayValue || '--';
+        }
 
-function updateChart(chartData) {
-    const ctx = document.getElementById('mainChart').getContext('2d');
-    const labels = chartData.map(d => d.season);
-    const values = chartData.map(d => d.value);
+        // 2. Scoreboard (Matches)
+        const scoreboardData = await fetchESPN(`${leagueId}/scoreboard`);
+        if (scoreboardData && scoreboardData.events) {
+            const upcomingEl = get('upcomingMatches');
+            upcomingEl.innerHTML = scoreboardData.events.slice(0, 5).map(event => {
+                const home = event.competitions[0].competitors[0];
+                const away = event.competitions[0].competitors[1];
+                const date = new Date(event.date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
+                const time = new Date(event.date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+                return `
+                    <div class="p-3 bg-slate-900/50 rounded-xl border border-slate-800/50 hover:border-slate-700 transition-all">
+                        <div class="flex justify-between text-[9px] font-bold text-slate-500 mb-2 uppercase tracking-tighter">
+                            <span>${date}</span> <span class="text-blue-500">${time}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-[11px] font-bold text-white">
+                            <span class="flex-1 truncate">${home.team.shortDisplayName}</span>
+                            <span class="text-[9px] text-slate-700 mx-2">VS</span>
+                            <span class="flex-1 text-right truncate">${away.team.shortDisplayName}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
 
-    if (state.chart) state.chart.destroy();
-
-    state.chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Rendimiento',
-                data: values,
-                borderColor: '#3b82f6',
-                borderWidth: 3,
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#3b82f6',
-                pointBorderColor: '#0f172a',
-                pointBorderWidth: 2,
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    backgroundColor: '#1e293b',
-                    titleColor: '#94a3b8',
-                    bodyColor: '#f8fafc',
-                    borderColor: '#334155',
-                    borderWidth: 1,
-                    padding: 12,
-                    displayColors: false
-                }
-            },
-            scales: {
-                y: {
-                    grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false },
-                    ticks: { color: '#64748b', font: { size: 10, weight: 'bold' } }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: { color: '#64748b', font: { size: 10, weight: 'bold' } }
-                }
+        // 3. Statistics (Scorers)
+        const statsData = await fetchESPN(`${leagueId}/statistics`);
+        if (statsData && statsData.categories) {
+            const goalsCat = statsData.categories.find(c => c.name === 'goals');
+            if (goalsCat) {
+                get('scorerList').innerHTML = goalsCat.athletes.slice(0, 6).map((athlete, i) => `
+                    <div class="flex items-center justify-between p-2 rounded-xl bg-slate-900/40 border border-transparent hover:border-slate-800 transition-all">
+                        <span class="text-xs font-bold text-slate-500 w-4">${i+1}</span>
+                        <div class="flex-1 ml-4 overflow-hidden">
+                            <p class="text-xs font-bold text-white truncate">${athlete.athlete.displayName}</p>
+                            <p class="text-[8px] text-slate-600 font-bold uppercase">${athlete.athlete.teamName}</p>
+                        </div>
+                        <span class="text-sm font-black text-blue-500">${athlete.displayValue}</span>
+                    </div>
+                `).join('');
             }
         }
-    });
-}
-
-// --- CORE LOGIC ---
-async function loadData() {
-    showLoader(true);
-    let finalData = null;
-    let usingAPI = false;
-
-    // Solo intentamos API si es Fútbol y tenemos una liga
-    if (state.currentSport === 'football') {
-        const matchesData = await fetchAPI(`/competitions/${state.currentLeague}/matches`);
-        const scorersData = await fetchAPI(`/competitions/${state.currentLeague}/scorers?limit=10`);
-
-        if (matchesData && matchesData.matches) {
-            usingAPI = true;
-            const teamMatches = matchesData.matches.filter(m => 
-                m.homeTeam.name.includes(state.favTeam) || m.awayTeam.name.includes(state.favTeam)
-            );
-
-            // Si no hay partidos del equipo favorito, usamos todos los de la liga para no dejar vacío
-            const displayMatches = teamMatches.length > 0 ? teamMatches : matchesData.matches;
-            
-            // Calcular estadísticas
-            let wins = 0, losses = 0, draws = 0, goals = 0;
-            displayMatches.forEach(m => {
-                const isHome = m.homeTeam.name.includes(state.favTeam);
-                const teamScore = isHome ? m.score.fullTime.home : m.score.fullTime.away;
-                const rivalScore = isHome ? m.score.fullTime.away : m.score.fullTime.home;
-                
-                if (teamScore !== null) {
-                    goals += teamScore;
-                    if (teamScore > rivalScore) wins++;
-                    else if (teamScore < rivalScore) losses++;
-                    else draws++;
-                }
-            });
-
-            finalData = {
-                kpis: {
-                    totalMatches: displayMatches.length,
-                    wins: wins,
-                    losses: losses,
-                    goals: goals
-                },
-                matches: displayMatches.slice(0, 10).map(m => {
-                    const isHome = m.homeTeam.name.includes(state.favTeam);
-                    const teamScore = isHome ? m.score.fullTime.home : m.score.fullTime.away;
-                    const rivalScore = isHome ? m.score.fullTime.away : m.score.fullTime.home;
-                    return {
-                        date: m.utcDate.split('T')[0],
-                        opponent: isHome ? m.awayTeam.name : m.homeTeam.name,
-                        result: teamScore > rivalScore ? 'W' : (teamScore < rivalScore ? 'L' : 'D'),
-                        score: `${m.score.fullTime.home}-${m.score.fullTime.away}`
-                    };
-                }),
-                scorers: scorersData?.scorers || [],
-                chartData: [
-                    { season: '2021', value: goals - 15 },
-                    { season: '2022', value: goals - 8 },
-                    { season: '2023', value: goals - 4 },
-                    { season: '2024', value: goals }
-                ]
-            };
-        }
+    } catch (e) {
+        console.error("Error cargando liga", e);
     }
-
-    // Fallback or Non-football
-    if (!finalData) {
-        usingAPI = false;
-        finalData = sportsData[state.currentSport];
-    }
-
-    // Update UI
-    state.isUsingLiveAPI = usingAPI;
-    elements.sourceLabel.innerText = usingAPI ? "Live API" : "Static Data";
-    elements.sourceLabel.className = `data-source-badge ${usingAPI ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`;
-    
-    updateKPIs(finalData);
-    updateMatches(finalData.matches);
-    updateScorers(finalData.scorers);
-    updateChart(finalData.chartData);
-    
     showLoader(false);
 }
 
-// --- CATEGORY SWITCH ---
-function setSport(sport) {
-    state.currentSport = sport;
-    
-    // UI update buttons
-    [elements.btnFootball, elements.btnBasketball, elements.btnTennis].forEach(btn => {
-        btn.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
-        btn.classList.add('text-slate-400');
-    });
-    
-    const activeBtn = sport === 'football' ? elements.btnFootball : (sport === 'basketball' ? elements.btnBasketball : elements.btnTennis);
-    activeBtn.classList.remove('text-slate-400');
-    activeBtn.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
-    
-    // Show/Hide league selector
-    elements.leagueSelector.style.display = sport === 'football' ? 'block' : 'none';
-    
-    loadData();
+async function showTeamDetails(leagueId, teamId) {
+    showLoader(true);
+    // Note: Localized team details from ESPN internal API
+    const teamData = await fetchESPN(`${leagueId}/teams/${teamId}`);
+    if (teamData && teamData.team) {
+        const team = teamData.team;
+        get('detailTeamCrest').src = team.logos[0].href;
+        get('detailTeamName').innerText = team.displayName;
+        get('detailTeamArena').innerText = team.location || 'Sede';
+        
+        // Squad can be fetched from /roster
+        const rosterData = await fetchESPN(`${leagueId}/teams/${teamId}/roster`);
+        if (rosterData && rosterData.athletes) {
+            get('teamSquadList').innerHTML = rosterData.athletes.slice(0, 20).map(p => `
+                <div class="p-3 bg-slate-800/30 rounded-xl flex justify-between items-center text-xs">
+                    <div class="flex items-center gap-3">
+                        <span class="text-slate-600 font-bold w-4">${p.jersey || '--'}</span>
+                        <div><p class="font-bold text-white">${p.displayName}</p><p class="text-[9px] text-slate-500 uppercase">${p.position.displayName}</p></div>
+                    </div>
+                    <div class="text-[9px] font-bold text-blue-400">${p.birthPlace?.country || '??'}</div>
+                </div>
+            `).join('');
+        }
+        get('teamDetailsOverlay').classList.remove('hidden');
+    }
+    showLoader(false);
+}
+
+function showLoader(show) {
+    const loader = get('globalLoader');
+    if (loader) loader.classList.toggle('hidden', !show);
 }
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Fill inputs with current state
-    elements.apiKeyInput.value = state.apiKey;
-    elements.teamInput.value = state.favTeam;
+    console.log("[Init] SportsStats Pro - ESPN Edition");
+    
+    // Initial ESPNSync
+    loadESPNData();
+    setInterval(loadESPNData, 60000);
 
-    // Listeners
-    elements.leagueSelector.addEventListener('change', (e) => {
-        state.currentLeague = e.target.value;
-        loadData();
+    // Dynamic Selectors
+    get('leagueSelector').addEventListener('change', (e) => { 
+        state.currentLeague = e.target.value; 
+        loadLeagueData(); 
     });
 
-    elements.configToggle.addEventListener('click', () => {
-        elements.configPanel.classList.toggle('hidden');
+    get('closeTeamDetails').addEventListener('click', () => { 
+        get('teamDetailsOverlay').classList.add('hidden'); 
     });
 
-    elements.saveApiKey.addEventListener('click', () => {
-        state.apiKey = elements.apiKeyInput.value;
-        state.favTeam = elements.teamInput.value;
-        localStorage.setItem('sportsStats_apiKey', state.apiKey);
+    get('btnFootball').addEventListener('click', () => { 
+        loadLeagueData(); 
+    });
+
+    get('configToggle').addEventListener('click', () => { 
+        get('configPanel').classList.toggle('hidden'); 
+    });
+
+    get('saveApiKey').addEventListener('click', () => {
+        state.favTeam = get('teamInput').value || state.favTeam;
         localStorage.setItem('sportsStats_favTeam', state.favTeam);
-        elements.configPanel.classList.add('hidden');
-        loadData();
+        get('configPanel').classList.add('hidden');
+        loadLeagueData();
     });
-
-    elements.btnFootball.addEventListener('click', () => setSport('football'));
-    elements.btnBasketball.addEventListener('click', () => setSport('basketball'));
-    elements.btnTennis.addEventListener('click', () => setSport('tennis'));
 
     // Start
-    loadData();
+    loadLeagueData();
 });

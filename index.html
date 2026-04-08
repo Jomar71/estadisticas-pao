@@ -31,30 +31,14 @@
             margin: 0;
         }
 
-        h1, h2, h3, .font-display {
-            font-family: 'Outfit', sans-serif;
-        }
-
         .glass-card {
             background: var(--glass);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
             border-radius: 1.25rem;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
         }
-
-        .glass-card:hover {
-            border-color: rgba(255, 255, 255, 0.2);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            transform: translateY(-2px);
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #334155; }
 
         .data-source-badge {
             font-size: 0.65rem;
@@ -73,44 +57,39 @@
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
         
-        /* Win/Loss Badges */
         .badge-win { background: #10b98120; color: #10b981; border: 1px solid #10b98140; }
         .badge-loss { background: #ef444420; color: #ef4444; border: 1px solid #ef444440; }
         .badge-draw { background: #f59e0b20; color: #f59e0b; border: 1px solid #f59e0b40; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .animate-fade-in {
-            animation: fadeIn 0.5s ease forwards;
-        }
+        .scrollbar-none::-webkit-scrollbar { display: none; }
+        .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-0">
 
-    <div class="max-w-7xl mx-auto">
+    <!-- Top Live Scoreboard -->
+    <div id="topScoreboard" class="w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800 overflow-x-auto whitespace-nowrap sticky top-0 z-50 py-2 scrollbar-none hidden lg:flex items-center gap-4 px-4 min-h-[45px]">
+        <!-- Live matches will load here -->
+    </div>
+
+    <div class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
         <!-- Header -->
-        <header class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-10 gap-6">
-            <div class="space-y-2">
+        <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+            <div>
                 <div class="flex items-center gap-3">
-                    <div class="p-3 bg-blue-600 rounded-2xl shadow-lg shadow-blue-500/20">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5z"></path><path d="M8.5 8.5L4.5 12.5"></path><path d="M15.5 15.5L19.5 11.5"></path><path d="M15.5 8.5L19.5 4.5"></path><path d="M8.5 15.5L4.5 19.5"></path></svg>
+                    <div class="p-3 bg-blue-600 rounded-2xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5z"></path><path d="M8.5 8.5L4.5 12.5"></path><path d="M15.5 15.5L19.5 11.5"></path></svg>
                     </div>
-                    <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight text-white font-display">SportsStats <span class="text-blue-500">Pro</span></h1>
+                    <h1 class="text-3xl font-extrabold text-white">SportsStats <span class="text-blue-500">Pro</span></h1>
                 </div>
-                <p class="text-slate-400 flex items-center gap-2">
-                    <span id="sourceLabel" class="data-source-badge bg-blue-500/10 text-blue-400 border border-blue-500/20">Live API</span>
-                    Dashboard interactivo de rendimiento deportivo
+                <p id="subHeader" class="text-slate-400 text-xs mt-1 flex items-center gap-2">
+                    <span id="sourceLabel" class="data-source-badge bg-blue-600/20 text-blue-400">ESPN PREMIUM LIVE</span>
+                    Cobertura total: Sudamérica, Colombia, México y Europa
                 </p>
             </div>
 
-            <!-- Global Controls -->
             <div class="flex flex-wrap gap-3 items-center w-full lg:w-auto">
                 <div class="flex bg-slate-900/50 p-1 rounded-xl border border-slate-800">
                     <button id="btnFootball" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-blue-600 text-white shadow-sm">Fútbol</button>
@@ -118,125 +97,128 @@
                     <button id="btnTennis" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white transition-all">Tenis</button>
                 </div>
                 
-                <select id="leagueSelector" class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all cursor-pointer">
-                    <option value="PL">🏴 Premier League</option>
-                    <option value="PD">🇪🇸 La Liga</option>
-                    <option value="BL1">🇩🇪 Bundesliga</option>
-                    <option value="SA">🇮🇹 Serie A</option>
-                    <option value="FL1">🇫🇷 Ligue 1</option>
+                <select id="leagueSelector" class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white outline-none cursor-pointer">
+                    <optgroup label="🌍 Competiciones TOP" class="bg-slate-900 font-bold">
+                        <option value="eng.1">🏴 Premier League</option>
+                        <option value="esp.1">🇪🇸 La Liga</option>
+                        <option value="ger.1">🇩🇪 Bundesliga</option>
+                        <option value="ita.1">🇮🇹 Serie A</option>
+                        <option value="fra.1">🇫🇷 Ligue 1</option>
+                        <option value="uefa.champions">🏆 Champions League</option>
+                    </optgroup>
+                    <optgroup label="🇨🇴 Colombia" class="bg-slate-900 font-bold">
+                        <option value="col.1">🥇 Primera A Colombia</option>
+                        <option value="col.2">🥈 Primera B Colombia</option>
+                        <option value="col.cup">🏆 Copa Colombia</option>
+                    </optgroup>
+                    <optgroup label="🌎 Sudamérica" class="bg-slate-900 font-bold">
+                        <option value="conmebol.libertadores">🏆 Copa Libertadores</option>
+                        <option value="conmebol.sudamericana">🏆 Copa Sudamericana</option>
+                        <option value="arg.1">🇦🇷 Liga Profesional Arg</option>
+                        <option value="bra.1">🇧🇷 Serie A Brasil</option>
+                    </optgroup>
+                    <optgroup label="🇲🇽 Norteamérica" class="bg-slate-900 font-bold">
+                        <option value="mex.1">🇲🇽 Liga MX</option>
+                        <option value="usa.1">🇺🇸 MLS</option>
+                    </optgroup>
                 </select>
 
-                <button id="configToggle" class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 hover:bg-slate-800 transition-all text-slate-400 hover:text-white" title="Configuración">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <div class="relative w-full lg:w-64">
+                    <input type="text" id="globalSearch" placeholder="Buscar equipos..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-10 py-2.5 text-sm text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all">
+                    <div class="absolute left-3.5 top-3 text-slate-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                    </div>
+                </div>
+
+                <button id="configToggle" class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 hover:bg-slate-800 transition-all text-slate-400 hover:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path></svg>
                 </button>
             </div>
         </header>
 
         <!-- Config Panel -->
-        <div id="configPanel" class="hidden glass-card p-6 mb-8 border-blue-500/30 bg-blue-500/5">
-            <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"></path><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"></path><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"></path></svg>
-                Configuración de API
-            </h3>
-            <div class="grid md:grid-cols-2 gap-6">
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Football-Data.org API Key</label>
-                    <div class="flex gap-2">
-                        <input type="password" id="apiKeyInput" placeholder="Pega tu API Key aquí..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm focus:border-blue-500 outline-none">
-                        <button id="saveApiKey" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-xl text-sm font-bold transition-all">Guardar</button>
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider">Equipo Favorito (Nombre exacto)</label>
-                    <input type="text" id="teamInput" placeholder="Ej: Manchester City, Real Madrid..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm focus:border-blue-500 outline-none">
-                </div>
+        <div id="configPanel" class="hidden glass-card p-6 bg-blue-500/5">
+            <h3 class="text-lg font-bold mb-4">Configuración</h3>
+            <div class="grid md:grid-cols-2 gap-4">
+                <input type="password" id="apiKeyInput" placeholder="API Key..." class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm">
+                <input type="text" id="teamInput" placeholder="Equipo Favorito..." class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm">
+                <button id="saveApiKey" class="bg-blue-600 px-4 py-2 rounded-xl text-sm font-bold md:col-span-2">Guardar Cambios</button>
             </div>
         </div>
 
-        <!-- KPIs Grid -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-10">
-            <div class="glass-card p-6 relative overflow-hidden group">
-                <div class="absolute -right-2 -top-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 14 4-4"></path><path d="M3.34 19a10 10 0 1 1 17.32 0"></path></svg>
-                </div>
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Partidos Jugados</p>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-blue-500" id="kpiPartidos">--</h3>
-            </div>
-            <div class="glass-card p-6 relative overflow-hidden group border-emerald-500/20">
-                <div class="absolute -right-2 -top-2 opacity-10 group-hover:opacity-20 transition-opacity text-emerald-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><path d="m9 11 3 3L22 4"></path></svg>
-                </div>
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Victorias</p>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-emerald-500" id="kpiVictorias">--</h3>
-            </div>
-            <div class="glass-card p-6 relative overflow-hidden group border-rose-500/20">
-                <div class="absolute -right-2 -top-2 opacity-10 group-hover:opacity-20 transition-opacity text-rose-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>
-                </div>
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Derrotas</p>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-rose-500" id="kpiDerrotas">--</h3>
-            </div>
-            <div class="glass-card p-6 relative overflow-hidden group border-amber-500/20">
-                <div class="absolute -right-2 -top-2 opacity-10 group-hover:opacity-20 transition-opacity text-amber-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v20"></path><path d="m4.93 4.93 14.14 14.14"></path><path d="M2 12h20"></path><path d="m19.07 4.93-14.14 14.14"></path></svg>
-                </div>
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Puntos/Goles</p>
-                <h3 class="text-3xl md:text-4xl font-extrabold text-amber-500" id="kpiGoles">--</h3>
-            </div>
+        <!-- KPIs -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Partidos</p><h3 class="text-3xl font-extrabold text-blue-500" id="kpiPartidos">--</h3></div>
+            <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Victorias</p><h3 class="text-3xl font-extrabold text-emerald-500" id="kpiVictorias">--</h3></div>
+            <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Derrotas</p><h3 class="text-3xl font-extrabold text-rose-500" id="kpiDerrotas">--</h3></div>
+            <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Puntos</p><h3 class="text-3xl font-extrabold text-amber-500" id="kpiGoles">--</h3></div>
         </div>
 
-        <!-- Main Content -->
+        <!-- Charts & Content -->
         <div class="grid lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-8">
-                <div class="glass-card p-6 md:p-8">
-                    <h3 class="text-xl font-bold mb-6">Progresión de Rendimiento</h3>
-                    <div class="h-[300px]">
-                        <canvas id="mainChart"></canvas>
+                <!-- ESPN News -->
+                <div class="glass-card overflow-hidden">
+                    <div class="p-6 border-b border-slate-800 bg-slate-900/30 flex justify-between items-center">
+                        <h3 class="text-xl font-bold">Noticias ESPN</h3>
+                        <span class="px-2 py-0.5 bg-red-600 rounded text-[10px] text-white font-bold">LIVE</span>
+                    </div>
+                    <div id="newsContainer" class="p-4 grid md:grid-cols-2 gap-4">
+                        <!-- News load here -->
                     </div>
                 </div>
 
+                <!-- Standings -->
                 <div class="glass-card overflow-hidden">
-                    <div class="p-6 border-b border-slate-800 bg-slate-900/30">
-                        <h3 class="text-xl font-bold">Últimos Partidos</h3>
-                    </div>
+                    <div class="p-6 border-b border-slate-800"><h3 class="text-xl font-bold">Clasificación</h3></div>
                     <div class="overflow-x-auto">
-                        <table class="w-full">
-                            <thead>
-                                <tr class="bg-slate-900/50 text-[10px] uppercase font-bold text-slate-400">
-                                    <th class="px-6 py-4 text-left">Fecha</th>
-                                    <th class="px-6 py-4 text-left">Rival</th>
-                                    <th class="px-6 py-4 text-center">Resultado</th>
-                                    <th class="px-6 py-4 text-right">Marcador</th>
-                                </tr>
+                        <table class="w-full text-sm">
+                            <thead class="bg-slate-900/50 text-slate-400 font-bold uppercase text-[10px]">
+                                <tr> <th class="px-6 py-4 text-left">Pos</th> <th class="px-6 py-4 text-left">Equipo</th> <th class="px-6 py-4 text-center">PJ</th> <th class="px-6 py-4 text-center">Pts</th> <th class="px-6 py-4 text-center">Dif</th> </tr>
                             </thead>
-                            <tbody id="matchHistory" class="divide-y divide-slate-800"></tbody>
+                            <tbody id="standingsTable" class="divide-y divide-slate-800"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
             <div class="space-y-8">
-                <div class="glass-card">
-                    <div class="p-6 border-b border-slate-800">
-                        <h3 class="text-xl font-bold">Top Jugadores</h3>
-                    </div>
-                    <div id="scorerList" class="p-2 space-y-1"></div>
+                <!-- Scorers -->
+                <div class="glass-card p-6">
+                    <h3 class="text-xl font-bold mb-4">Goleadores</h3>
+                    <div id="scorerList" class="space-y-2"></div>
                 </div>
-
-                <div class="glass-card p-6 bg-gradient-to-br from-blue-600/10 to-transparent">
-                    <p class="italic font-medium text-slate-300">"El éxito no es definitivo, el fracaso no es fatal: lo que cuenta es el valor para continuar."</p>
-                    <p class="text-[10px] font-bold text-slate-500 mt-2 uppercase tracking-widest">— Winston Churchill</p>
+                
+                <!-- Upcoming -->
+                <div class="glass-card p-6">
+                    <h3 class="text-xl font-bold mb-4">Próximos Partidos</h3>
+                    <div id="upcomingMatches" class="space-y-3"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Loader -->
-    <div id="globalLoader" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden">
-        <div class="flex flex-col items-center gap-4">
-            <div class="loader"></div>
-            <p class="text-xs font-bold text-blue-400 animate-pulse tracking-widest">CARGANDO DATOS...</p>
+    <!-- Modals & Overlays -->
+    <div id="teamDetailsOverlay" class="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-[60] flex justify-end hidden">
+        <div class="w-full max-w-lg bg-slate-900 h-full p-8 border-l border-slate-800 overflow-y-auto">
+            <div class="flex justify-between mb-8">
+                <div class="flex items-center gap-4">
+                    <img id="detailTeamCrest" src="" class="w-16 h-16 object-contain">
+                    <div><h2 id="detailTeamName" class="text-3xl font-bold">--</h2><p id="detailTeamArena" class="text-blue-500 text-xs font-bold uppercase">--</p></div>
+                </div>
+                <button id="closeTeamDetails" class="text-2xl">&times;</button>
+            </div>
+            <div id="teamSquadList" class="space-y-2"></div>
         </div>
+    </div>
+
+    <div id="searchResults" class="fixed top-24 right-4 w-72 glass-card p-4 z-50 hidden">
+        <h4 class="text-xs font-bold text-slate-500 mb-2 uppercase">Resultados</h4>
+        <div id="searchResultsList" class="space-y-2"></div>
+    </div>
+
+    <div id="globalLoader" class="fixed inset-0 bg-slate-950/80 z-[100] flex items-center justify-center hidden">
+        <div class="loader"></div>
     </div>
 
     <script src="js/data.js"></script>
