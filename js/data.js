@@ -102,3 +102,14 @@ const sportsData = {
         standings: []
     }
 };
+
+const misterChipFacts = [
+    "Lucho Díaz es el primer colombiano en marcar en cuartos de final de Champions League con dos equipos diferentes (Porto y Liverpool).",
+    "La Liga BetPlay es la competición con mayor promedio de tiempo añadido en Sudamérica durante 2024.",
+    "James Rodríguez igualó a 'Pibe' Valderrama como máximo asistente de la Selección Colombia en eliminatorias con 11 pases de gol.",
+    "El Real Madrid no perdía un partido de eliminatoria europea tras ganar la ida desde el año 2019 contra el Ajax.",
+    "Dato histórico: La última vez que un equipo colombiano ganó la Libertadores sin perder un solo partido en casa fue Atlético Nacional en 2016.",
+    "Récord: Kevin Mier es el portero con más vallas invictas fuera de su país en ligas de la CONCACAF durante este semestre.",
+    "Curiosidad: Desde el año 2000, solo 3 entrenadores colombianos han ganado títulos en ligas de Europa.",
+    "Lucho Díaz ha participado directamente en 15 goles en sus últimos 20 partidos de Premier League."
+];

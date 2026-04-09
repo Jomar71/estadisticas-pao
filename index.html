@@ -69,38 +69,69 @@
 </head>
 <body class="p-0">
 
-    <!-- Top Live Scoreboard -->
-    <div id="topScoreboard" class="w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-800 overflow-x-auto whitespace-nowrap sticky top-0 z-50 py-2 scrollbar-none hidden lg:flex items-center gap-4 px-4 min-h-[45px]">
+    <!-- Barra Superior: Deportes (Black Header) -->
+    <nav class="bg-[#121212] text-white px-4 md:px-8 py-3 flex items-center gap-6 overflow-x-auto whitespace-nowrap scrollbar-none border-b border-white/5">
+        <div class="font-black text-xl italic mr-4 tracking-tighter">ESPN<span class="text-blue-500">PAO</span></div>
+        <a href="#" class="text-sm font-bold border-b-2 border-blue-500 pb-1">Fútbol</a>
+        <a href="#" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Ciclismo</a>
+        <a href="#" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">F1</a>
+        <a href="#" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Tenis</a>
+        <a href="#" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Básquetbol</a>
+        <a href="#" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">MLB</a>
+        <a href="#" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Golf</a>
+        <a href="#" class="text-sm font-bold text-slate-400 hover:text-white transition-colors">Más Deportes</a>
+    </nav>
+
+    <!-- Barra Inferior: Secciones (White/Sub-header) -->
+    <nav id="subNavigation" class="bg-white text-slate-900 px-4 md:px-8 py-2.5 flex items-center gap-6 overflow-x-auto whitespace-nowrap scrollbar-none shadow-sm sticky top-0 z-[60]">
+        <button data-tab="portada" class="tab-btn active text-sm font-bold text-blue-600 border-b-2 border-blue-600 pb-1">Portada</button>
+        <div class="relative group">
+            <button id="ligasMenuBtn" class="text-sm font-bold text-slate-500 hover:text-slate-900 flex items-center gap-1">Ligas <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+            <!-- Dropdown simple -->
+            <div class="absolute left-0 top-full mt-2 w-48 bg-white border border-slate-200 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-[100] py-2">
+                <a href="#" onclick="changeLeague('esp.1')" class="block px-4 py-2 text-xs font-bold hover:bg-slate-50">🇪🇸 La Liga</a>
+                <a href="#" onclick="changeLeague('eng.1')" class="block px-4 py-2 text-xs font-bold hover:bg-slate-50">🏴 Premier League</a>
+                <a href="#" onclick="changeLeague('col.1')" class="block px-4 py-2 text-xs font-bold hover:bg-slate-50">🇨🇴 Liga BetPlay</a>
+                <a href="#" onclick="changeLeague('conmebol.libertadores')" class="block px-4 py-2 text-xs font-bold hover:bg-slate-50">🏆 Libertadores</a>
+                <div class="border-t border-slate-100 my-1"></div>
+                <a href="https://www.espn.com.co/futbol/torneos" target="_blank" class="block px-4 py-2 text-[10px] font-black text-blue-600 hover:bg-blue-50 uppercase tracking-widest">Explorar Torneos →</a>
+            </div>
+        </div>
+        <button data-tab="resultados" class="tab-btn text-sm font-bold text-slate-500 hover:text-slate-900">Resultados</button>
+        <button data-tab="calendario" class="tab-btn text-sm font-bold text-slate-500 hover:text-slate-900">Calendario</button>
+        <button data-tab="equipos" class="tab-btn text-sm font-bold text-slate-500 hover:text-slate-900">Equipos</button>
+        <button data-tab="posiciones" class="tab-btn text-sm font-bold text-slate-500 hover:text-slate-900">Posiciones</button>
+        <button data-tab="especiales" class="tab-btn text-sm font-bold text-slate-500 hover:text-slate-900">NotiFutbol</button>
+    </nav>
+
+    <!-- Top Live Scoreboard (Now simplified) -->
+    <div id="topScoreboard" class="w-full bg-slate-900/50 backdrop-blur-md border-b border-slate-800 overflow-x-auto whitespace-nowrap py-2 scrollbar-none hidden flex items-center gap-4 px-4 min-h-[45px]">
         <!-- Live matches will load here -->
     </div>
 
     <div class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
-        <!-- Header -->
+        <!-- Header (Refined) -->
         <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
             <div>
                 <div class="flex items-center gap-3">
-                    <div class="p-3 bg-blue-600 rounded-2xl">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5z"></path><path d="M8.5 8.5L4.5 12.5"></path><path d="M15.5 15.5L19.5 11.5"></path></svg>
-                    </div>
-                    <h1 class="text-3xl font-extrabold text-white">SportsStats <span class="text-blue-500">Pro</span></h1>
+                    <h1 class="text-3xl font-extrabold text-white">Estadísticas <span class="text-blue-500">PAO</span></h1>
                 </div>
                 <p id="subHeader" class="text-slate-400 text-xs mt-1 flex items-center gap-2">
-                    <span id="sourceLabel" class="data-source-badge bg-blue-600/20 text-blue-400">ESPN PREMIUM LIVE</span>
-                    Cobertura total: Sudamérica, Colombia, México y Europa
+                    <span id="sourceLabel" class="data-source-badge bg-blue-600/20 text-blue-400">ESTADISTICAS PAO ENGINE</span>
+                    Panel de Monitoreo Deportivo Avanzado
                 </p>
+                <div id="updateStatus" class="mt-2 flex items-center gap-2 text-[10px] text-slate-500 font-medium">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+                    Última actualización: <span id="lastUpdateTime">--:--:--</span>
+                </div>
             </div>
 
             <div class="flex flex-wrap gap-3 items-center w-full lg:w-auto">
-                <div class="flex bg-slate-900/50 p-1 rounded-xl border border-slate-800">
-                    <button id="btnFootball" class="px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-blue-600 text-white shadow-sm">Fútbol</button>
-                    <button id="btnBasketball" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white transition-all">Basket</button>
-                    <button id="btnTennis" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-400 hover:text-white transition-all">Tenis</button>
-                </div>
-                
-                <select id="leagueSelector" class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white outline-none cursor-pointer">
+                <select id="leagueSelector" class="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white outline-none cursor-pointer focus:border-blue-500 transition-all">
+                    <!-- Options... -->
                     <optgroup label="🌍 Competiciones TOP" class="bg-slate-900 font-bold">
                         <option value="eng.1">🏴 Premier League</option>
-                        <option value="esp.1">🇪🇸 La Liga</option>
+                        <option value="esp.1" selected>🇪🇸 La Liga</option>
                         <option value="ger.1">🇩🇪 Bundesliga</option>
                         <option value="ita.1">🇮🇹 Serie A</option>
                         <option value="fra.1">🇫🇷 Ligue 1</option>
@@ -111,28 +142,21 @@
                         <option value="col.2">🥈 Primera B Colombia</option>
                         <option value="col.cup">🏆 Copa Colombia</option>
                     </optgroup>
+                    <!-- More options... -->
                     <optgroup label="🌎 Sudamérica" class="bg-slate-900 font-bold">
                         <option value="conmebol.libertadores">🏆 Copa Libertadores</option>
                         <option value="conmebol.sudamericana">🏆 Copa Sudamericana</option>
                         <option value="arg.1">🇦🇷 Liga Profesional Arg</option>
                         <option value="bra.1">🇧🇷 Serie A Brasil</option>
                     </optgroup>
-                    <optgroup label="🇲🇽 Norteamérica" class="bg-slate-900 font-bold">
-                        <option value="mex.1">🇲🇽 Liga MX</option>
-                        <option value="usa.1">🇺🇸 MLS</option>
-                    </optgroup>
                 </select>
 
                 <div class="relative w-full lg:w-64">
-                    <input type="text" id="globalSearch" placeholder="Buscar equipos..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-10 py-2.5 text-sm text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all">
+                    <input type="text" id="globalSearch" placeholder="Buscar equipo o jugador..." class="w-full bg-slate-900 border border-slate-800 rounded-xl px-10 py-2.5 text-sm text-white focus:ring-2 focus:ring-blue-500/50 outline-none transition-all">
                     <div class="absolute left-3.5 top-3 text-slate-500">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
                     </div>
                 </div>
-
-                <button id="configToggle" class="bg-slate-900 p-2.5 rounded-xl border border-slate-800 hover:bg-slate-800 transition-all text-slate-400 hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path></svg>
-                </button>
             </div>
         </header>
 
@@ -146,53 +170,138 @@
             </div>
         </div>
 
-        <!-- KPIs -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Partidos</p><h3 class="text-3xl font-extrabold text-blue-500" id="kpiPartidos">--</h3></div>
-            <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Victorias</p><h3 class="text-3xl font-extrabold text-emerald-500" id="kpiVictorias">--</h3></div>
-            <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Derrotas</p><h3 class="text-3xl font-extrabold text-rose-500" id="kpiDerrotas">--</h3></div>
-            <div class="glass-card p-6"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Puntos</p><h3 class="text-3xl font-extrabold text-amber-500" id="kpiGoles">--</h3></div>
-        </div>
-
-        <!-- Charts & Content -->
-        <div class="grid lg:grid-cols-3 gap-8">
-            <div class="lg:col-span-2 space-y-8">
-                <!-- ESPN News -->
-                <div class="glass-card overflow-hidden">
-                    <div class="p-6 border-b border-slate-800 bg-slate-900/30 flex justify-between items-center">
-                        <h3 class="text-xl font-bold">Noticias ESPN</h3>
-                        <span class="px-2 py-0.5 bg-red-600 rounded text-[10px] text-white font-bold">LIVE</span>
+        <!-- Tab Content Areas -->
+        <div id="tabContent">
+            <!-- NotiFutbol Tab -->
+            <div data-content="especiales" class="tab-pane hidden space-y-6">
+                <div class="glass-card p-8 bg-slate-950/50 border-blue-500/20">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white font-black text-xl italic">N</div>
+                        <h3 class="text-3xl font-black text-white">NotiFutbol <span class="text-blue-500">Especiales</span></h3>
                     </div>
-                    <div id="newsContainer" class="p-4 grid md:grid-cols-2 gap-4">
-                        <!-- News load here -->
+                    <div id="misterChipFullList" class="grid md:grid-cols-2 gap-6">
+                        <!-- Facts will be injected here -->
                     </div>
                 </div>
+            </div>
 
-                <!-- Standings -->
+            <!-- Portada Tab -->
+            <div data-content="portada" class="tab-pane active space-y-8">
+                <!-- KPIs -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <div class="glass-card p-6 border-b-4 border-blue-500"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Partidos</p><h3 class="text-3xl font-extrabold text-blue-500" id="kpiPartidos">--</h3></div>
+                    <div class="glass-card p-6 border-b-4 border-emerald-500"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Victorias</p><h3 class="text-3xl font-extrabold text-emerald-500" id="kpiVictorias">--</h3></div>
+                    <div class="glass-card p-6 border-b-4 border-rose-500"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Derrotas</p><h3 class="text-3xl font-extrabold text-rose-500" id="kpiDerrotas">--</h3></div>
+                    <div class="glass-card p-6 border-b-4 border-amber-500"><p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Puntos</p><h3 class="text-3xl font-extrabold text-amber-500" id="kpiGoles">--</h3></div>
+                </div>
+
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-8">
+                        <!-- AI Summary -->
+                        <div class="glass-card bg-blue-600/5 border-blue-500/20 p-6 relative overflow-hidden group">
+                            <div class="absolute -right-8 -top-8 w-32 h-32 bg-blue-600/10 blur-3xl group-hover:bg-blue-600/20 transition-all rounded-full"></div>
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="p-2 bg-blue-600/20 rounded-lg text-blue-400">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                                </div>
+                                <h3 class="text-sm font-bold text-white uppercase tracking-wider">Resumen de Consulta (IA)</h3>
+                            </div>
+                            <p id="aiSummary" class="text-sm text-slate-300 leading-relaxed">Analizando datos en tiempo real...</p>
+                        </div>
+
+                        <!-- Highlights Section -->
+                        <div class="glass-card overflow-hidden">
+                            <div class="p-6 border-b border-slate-800 bg-slate-900/30 flex justify-between items-center">
+                                <h3 class="text-xl font-bold">Noticias y Actualidad</h3>
+                                <span class="px-2 py-0.5 bg-red-600 rounded text-[10px] text-white font-bold uppercase tracking-widest">Live</span>
+                            </div>
+                            <div id="newsContainer" class="p-4 grid md:grid-cols-2 gap-4"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-8">
+                        <!-- Dato NotiFutbol -->
+                        <div class="glass-card p-6 bg-slate-950/50 border-blue-500/10 hover:border-blue-500/30 transition-all">
+                            <div class="flex items-center gap-2 mb-4">
+                                <span class="text-red-500 font-bold text-lg">🔴</span>
+                                <h3 class="text-sm font-black text-white uppercase tracking-widest">NotiFutbol</h3>
+                            </div>
+                            <p id="misterChipText" class="text-xs text-slate-400 italic font-medium leading-relaxed border-l-2 border-slate-800 pl-4">Cargando datos históricos...</p>
+                        </div>
+
+                        <div class="glass-card p-6">
+                            <h3 class="text-xl font-bold mb-4">Próximos Partidos</h3>
+                            <div id="upcomingMatches" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Posiciones Tab (Full Statistics View) -->
+            <div data-content="posiciones" class="tab-pane hidden space-y-6">
                 <div class="glass-card overflow-hidden">
-                    <div class="p-6 border-b border-slate-800"><h3 class="text-xl font-bold">Clasificación</h3></div>
+                    <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/30">
+                        <h3 class="text-2xl font-black text-white">Tabla de Posiciones <span class="text-blue-500">Completa</span></h3>
+                        <a href="https://www.espn.com.co/futbol/posiciones/_/liga/col.1" target="_blank" class="text-[10px] font-bold text-blue-400 hover:underline italic">Ver en ESPN →</a>
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-sm">
-                            <thead class="bg-slate-900/50 text-slate-400 font-bold uppercase text-[10px]">
-                                <tr> <th class="px-6 py-4 text-left">Pos</th> <th class="px-6 py-4 text-left">Equipo</th> <th class="px-6 py-4 text-center">PJ</th> <th class="px-6 py-4 text-center">Pts</th> <th class="px-6 py-4 text-center">Dif</th> </tr>
+                            <thead class="bg-black text-slate-400 font-bold uppercase text-[10px]">
+                                <tr>
+                                    <th class="px-6 py-4 text-left">RK</th>
+                                    <th class="px-6 py-4 text-left">Equipo</th>
+                                    <th class="px-6 py-4 text-center">PJ</th>
+                                    <th class="px-6 py-4 text-center">G</th>
+                                    <th class="px-6 py-4 text-center">E</th>
+                                    <th class="px-6 py-4 text-center">P</th>
+                                    <th class="px-6 py-4 text-center">DG</th>
+                                    <th class="px-6 py-4 text-center text-blue-500 bg-blue-500/5">PTS</th>
+                                </tr>
                             </thead>
-                            <tbody id="standingsTable" class="divide-y divide-slate-800"></tbody>
+                            <tbody id="standingsTableFull" class="divide-y divide-slate-800/50"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <div class="space-y-8">
-                <!-- Scorers -->
+            <!-- Calendario Tab -->
+            <div data-content="calendario" class="tab-pane hidden space-y-6">
                 <div class="glass-card p-6">
-                    <h3 class="text-xl font-bold mb-4">Goleadores</h3>
-                    <div id="scorerList" class="space-y-2"></div>
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-black text-white">Calendario Oficial</h3>
+                        <a href="https://www.espn.com.co/futbol/calendario" target="_blank" class="text-[10px] font-bold text-blue-400 hover:underline italic">Ver en ESPN →</a>
+                    </div>
+                    <div id="upcomingMatchesCalendar" class="space-y-4"></div>
                 </div>
-                
-                <!-- Upcoming -->
+            </div>
+
+            <!-- Calendario & Resultados Tab -->
+            <div data-content="resultados" class="tab-pane hidden space-y-6">
                 <div class="glass-card p-6">
-                    <h3 class="text-xl font-bold mb-4">Próximos Partidos</h3>
-                    <div id="upcomingMatches" class="space-y-3"></div>
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-2xl font-black text-white">Resultados de Jornada</h3>
+                        <a href="https://www.espn.com.co/futbol/resultados" target="_blank" class="text-[10px] font-bold text-blue-400 hover:underline italic">Ver en ESPN →</a>
+                    </div>
+                    <div id="fullResultsList" class="grid md:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+
+            <!-- Equipos & Goleadores Tab -->
+            <div data-content="equipos" class="tab-pane hidden space-y-6">
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 glass-card p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold">Directorio de Equipos</h3>
+                            <a href="https://www.espn.com.co/futbol/equipos" target="_blank" class="text-[10px] font-bold text-blue-400 hover:underline italic">Ver todos →</a>
+                        </div>
+                        <div id="teamsDirectory" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <!-- Teams list will be here -->
+                        </div>
+                    </div>
+                    <div class="glass-card p-6">
+                        <h3 class="text-xl font-bold mb-6">Goleadores</h3>
+                        <div id="scorerList" class="space-y-3"></div>
+                    </div>
                 </div>
             </div>
         </div>
